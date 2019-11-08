@@ -1,10 +1,19 @@
 # RtbJavaLib
 屏效宝rtb广告
 
-# 依赖
+# gradle依赖
 dependencies {
     implementation 'com.esell:rtb:0.0.1'
 }
+# maven依赖
+
+        <dependency>
+            <groupId>com.esell</groupId>
+            <artifactId>rtb</artifactId>
+            <version>0.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+        
 # 拉取广告
 RtbManager rtbManager = RtbManager.getInstance();
 
