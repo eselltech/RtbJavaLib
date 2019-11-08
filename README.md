@@ -1,6 +1,11 @@
 # RtbJavaLib
 屏效宝rtb广告
 
+# 依赖
+dependencies {
+    implementation 'com.esell:rtb:0.0.1'
+}
+# 拉取广告
 RtbManager rtbManager = RtbManager.getInstance();
 
 rtbManager.init("pxbAppId", "pxbAppKey", "unicode");
