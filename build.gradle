@@ -19,9 +19,9 @@ allprojects {
     repositories {
         google()
         jcenter()
-//        maven {
-//            url getProject().rootDir.absolutePath+ File.separator + "repository"
-//        }
+        maven {
+            url getProject().rootDir.absolutePath+ File.separator + "repository"
+        }
     }
     // 解决 Execution failed for task':[YourLibraryName]:mavenAndroidJavadocs'.
     tasks.withType(Javadoc) {
