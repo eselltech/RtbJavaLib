@@ -1,5 +1,7 @@
 package com.esell.rtb;
 
+import java.util.HashMap;
+
 /**
  * rtb请求接口
  *
@@ -11,12 +13,30 @@ public interface IRTBRequest {
      * 默认超时时间
      */
     int TIMEOUT = 30 * 1000;
+
     /**
-     * 工作线程请求广告
-     *
-     * @param url          路径
-     * @param payload      参数
-     * @param onAdListener 监听
+     * 工作线程post请求
+     * @param url 路径
+     * @param params 参数
+     * @param callback 回调
      */
-    void postOnWorkThread(String url, String payload, OnAdListener onAdListener);
+    void postOnWorkThread(String url, HashMap<String, String> params, Callback callback);
+
+    /**
+     * 工作线程post请求
+     * @param url 路径
+     * @param callback 回调
+     */
+    void postOnWorkThread(String url, Callback callback);
+
+    /**
+     * 网络回调
+     */
+    interface Callback {
+        /**
+         * @param message  信息
+         * @param response 响应
+         */
+        void onFinish(Message message, String response);
+    }
 }

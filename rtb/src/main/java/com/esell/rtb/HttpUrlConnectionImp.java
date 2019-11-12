@@ -1,7 +1,6 @@
 package com.esell.rtb;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,7 +9,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.util.List;
+import java.util.HashMap;
 
 /**
  * 原生实现
@@ -24,78 +23,20 @@ final class HttpUrlConnectionImp implements IRTBRequest {
      */
     final Gson gson = new Gson();
 
-    /**
-     * post请求广告
-     *
-     * @param url          路径
-     * @param payload      参数
-     * @param onAdListener 监听
-     */
-    final void post(String url, String payload, OnAdListener onAdListener) {
-        if (onAdListener == null) {
-            return;
-        }
-        if (Tools.isEmpty(url)) {
-            onAdListener.onAd(Message.FAILED_URL_EMPTY, null);
-            return;
-        }
-        HttpURLConnection httpURLConnection = null;
-        OutputStream outputStream = null;
-        BufferedReader bufferedReader = null;
-        try {
-            httpURLConnection = (HttpURLConnection) new URL(url).openConnection();
-            configConnection(httpURLConnection);
-            httpURLConnection.connect();
-            outputStream = httpURLConnection.getOutputStream();
-            outputStream.write(("payload=" + payload).getBytes("UTF-8"));
-            outputStream.flush();
-            int responseCode = httpURLConnection.getResponseCode();
-            if (HttpURLConnection.HTTP_OK == responseCode) {
-                bufferedReader =
-                        new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
-                String readResponseBody = readResponseBody(bufferedReader);
-                List<RtbAD> parse = parse(readResponseBody);
-                onAdListener.onAd(Message.SUCCESS, parse);
-            } else {
-                onAdListener.onAd(new Message(responseCode,
-                        httpURLConnection.getResponseMessage()), null);
-            }
-        } catch (Exception e) {
-            onAdListener.onAd(new Message("Exception".hashCode(), Tools.throwable2String(e)), null);
-        } finally {
-            Tools.closeCloseable(outputStream);
-            Tools.closeCloseable(bufferedReader);
-        }
-    }
-
     @Override
-    public void postOnWorkThread(final String url, final String payload,
-                                 final OnAdListener onAdListener) {
+    public void postOnWorkThread(final String url, final HashMap<String, String> params,
+                                 final Callback callback) {
         Tools.pool.execute(new Runnable() {
             @Override
             public void run() {
-                post(url, payload, onAdListener);
+                post(url, params, callback);
             }
         });
     }
 
-    /**
-     * 解析响应数据
-     *
-     * @param readResponseBody json响应数据
-     * @return 对象
-     */
-    private List<RtbAD> parse(String readResponseBody) {
-        Result<List<RtbAD>> result = null;
-        result = gson.fromJson(readResponseBody, new TypeToken<Result<List<RtbAD>>>() {
-        }.getType());
-        if (result == null) {
-            return null;
-        }
-        if (result.isSuccess()) {
-            return result.getPayload();
-        }
-        return null;
+    @Override
+    public void postOnWorkThread(String url, Callback callback) {
+        postOnWorkThread(url, null, callback);
     }
 
     /**
@@ -133,4 +74,78 @@ final class HttpUrlConnectionImp implements IRTBRequest {
         httpURLConnection.setDoOutput(true);
         httpURLConnection.setUseCaches(false);
     }
+
+    /**
+     * post传参
+     *
+     * @param httpURLConnection
+     * @param params
+     * @return
+     * @throws IOException
+     */
+    private OutputStream writeParams(HttpURLConnection httpURLConnection,
+                                     HashMap<String, String> params) throws IOException {
+        if (params != null && params.size() > 0) {
+            OutputStream outputStream = httpURLConnection.getOutputStream();
+            StringBuilder paramsBuilder = new StringBuilder();
+            for (HashMap.Entry<String, String> stringStringEntry : params.entrySet()) {
+                String key = stringStringEntry.getKey();
+                String value = stringStringEntry.getValue();
+                paramsBuilder.append(key);
+                paramsBuilder.append("=");
+                paramsBuilder.append(value);
+                paramsBuilder.append("&");
+            }
+            paramsBuilder.deleteCharAt(paramsBuilder.length() - 1);
+            YLog.d("paramsBuilder : "+paramsBuilder.toString());
+            outputStream.write(paramsBuilder.toString().getBytes("UTF-8"));
+            paramsBuilder.setLength(0);
+            outputStream.flush();
+            return outputStream;
+        }
+        return null;
+    }
+
+    /**
+     * post请求广告
+     *
+     * @param url      路径
+     * @param params   参数
+     * @param callback
+     */
+    final void post(final String url, final HashMap<String, String> params,
+                    final Callback callback) {
+        if (callback == null) {
+            return;
+        }
+        if (Tools.isEmpty(url)) {
+            callback.onFinish(Message.FAILED_URL_EMPTY, null);
+            return;
+        }
+        HttpURLConnection httpURLConnection = null;
+        OutputStream outputStream = null;
+        BufferedReader bufferedReader = null;
+        try {
+            httpURLConnection = (HttpURLConnection) new URL(url).openConnection();
+            configConnection(httpURLConnection);
+            httpURLConnection.connect();
+            outputStream = writeParams(httpURLConnection, params);
+            int responseCode = httpURLConnection.getResponseCode();
+            if (HttpURLConnection.HTTP_OK == responseCode) {
+                bufferedReader =
+                        new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+                String readResponseBody = readResponseBody(bufferedReader);
+                callback.onFinish(Message.SUCCESS, readResponseBody);
+            } else {
+                callback.onFinish(new Message(responseCode,
+                        httpURLConnection.getResponseMessage()), null);
+            }
+        } catch (Exception e) {
+            callback.onFinish(new Message("Exception".hashCode(), Tools.throwable2String(e)), null);
+        } finally {
+            Tools.closeCloseable(outputStream);
+            Tools.closeCloseable(bufferedReader);
+        }
+    }
+
 }

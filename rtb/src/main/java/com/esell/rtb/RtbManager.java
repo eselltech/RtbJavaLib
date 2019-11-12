@@ -1,8 +1,13 @@
 package com.esell.rtb;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -17,9 +22,18 @@ import java.util.concurrent.TimeUnit;
 public final class RtbManager {
     private static final RtbManager mRtbManager = new RtbManager();
     /**
+     * 基本路径
+     */
+    private static final String URL_BASE = "http://api6.pingxiaobao.com/";
+
+    /**
      * 广告路径
      */
-    private static final String URL = "http://api6.pingxiaobao.com/rtb/subscribe.shtml";
+    private static final String URL_AD = URL_BASE + "rtb/subscribe.shtml";
+    /**
+     * 静态上报路径
+     */
+    private static final String URL_STATIC = URL_BASE + "t.shtm";
     /**
      * 非法参数异常格式
      */
@@ -33,6 +47,10 @@ public final class RtbManager {
      * 路径格式
      */
     final String urlFormat = "%s?appid=%s&sequence=%s&timestamp=%s&uuid=%s&version=%s&sign=%s";
+
+    final String staticUrlFormat =
+            "%s?sid=%s&aid=%s&mid=%s&uid=%s&ip=%s&mac=%s&lat=%s&lon=%s&tt" + "=%s";
+    final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHH");
     /**
      * 屏效宝广告默认版本
      */
@@ -104,7 +122,7 @@ public final class RtbManager {
      * @param onAdListener 广告监听
      * @param rtbSlot      屏效宝广告位
      */
-    public void request(OnAdListener onAdListener, RtbSlot rtbSlot) {
+    public void request(final OnAdListener onAdListener, RtbSlot rtbSlot) {
         checkInit();
         if (onAdListener == null) {
             YLog.e("onAdListener == null");
@@ -127,9 +145,37 @@ public final class RtbManager {
         /*最终签名*/
         final String sign = Tools.md5Hex(signFormatStr);
         /*请求路径*/
-        final String url = String.format(urlFormat, URL, appId, currentTimeMillis,
+        final String url = String.format(urlFormat, URL_AD, appId, currentTimeMillis,
                 currentTimeMillis, unicode, VERSION, sign);
-        request.postOnWorkThread(url, payload, onAdListener);
+        HashMap<String, String> params = new HashMap<>();
+        params.put("payload", payload);
+        request.postOnWorkThread(url, params, new IRTBRequest.Callback() {
+            @Override
+            public void onFinish(Message message, String response) {
+                if (Message.SUCCESS.equals(message)) {
+                    Result<List<RtbAD>> result = null;
+                    try {
+                        result = gson.fromJson(response, new TypeToken<Result<List<RtbAD>>>() {
+                        }.getType());
+                    } catch (JsonSyntaxException e) {
+                        e.printStackTrace();
+                        onAdListener.onAd(new Message("JsonSyntaxException".hashCode(),
+                                Tools.throwable2String(e)), null);
+                        return;
+                    }
+                    if (result == null) {
+                        onAdListener.onAd(new Message("result == null".hashCode(),
+                                "result == " + "null"), null);
+                        return;
+                    }
+                    if (result.isSuccess()) {
+                        onAdListener.onAd(message, result.getPayload());
+                        return;
+                    }
+                }
+                onAdListener.onAd(message, null);
+            }
+        });
     }
 
     /**
@@ -175,5 +221,53 @@ public final class RtbManager {
                 }
             }, rtbSlot);
         }
+    }
+
+    /**
+     * 静态上报
+     *
+     * @param slotId 广告位id
+     * @param adId   广告id
+     */
+    public void staticReport(String slotId, String adId, IRTBRequest.Callback callback) {
+        staticReport(slotId, adId, 0.0D, 0.0D, callback);
+    }
+
+    /**
+     * 静态上报
+     *
+     * @param slotId   广告位id
+     * @param adId     广告id
+     * @param lat      经纬度
+     * @param lon      经纬度
+     * @param callback 回调
+     */
+    public void staticReport(String slotId, String adId, double lat, double lon,
+                             IRTBRequest.Callback callback) {
+        checkInit();
+        String mid = "";
+        String uid = unicode;
+        String ip = Tools.getLocalIpAddress();
+        List<String> macList = null;
+        try {
+            macList = Tools.getMacList();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String mac = macList == null || macList.isEmpty() ? "" : macList.get(0);
+        String tt = simpleDateFormat.format(new Date());
+        String url = String.format(staticUrlFormat, URL_STATIC, slotId, adId, mid, uid, ip, mac,
+                lat, lon, tt);
+        request.postOnWorkThread(url, callback);
+    }
+
+    /**
+     * 动态上报
+     *
+     * @param trackUrl 上报路径
+     */
+    public void dynamicReport(String trackUrl, IRTBRequest.Callback callback) {
+        checkInit();
+        request.postOnWorkThread(trackUrl, callback);
     }
 }
