@@ -1,5 +1,6 @@
 package com.esell.simple;
 
+import com.esell.rtb.IRTBRequest;
 import com.esell.rtb.Message;
 import com.esell.rtb.OnAdListener;
 import com.esell.rtb.RtbAD;
@@ -24,5 +25,19 @@ public class Test {
             }
         }, new RtbSlot("广告位id", "类型", 1/*数量*/));
 
+        rtbManager.dynamicReport("广告的上报地址", new IRTBRequest.Callback() {
+            @Override
+            public void onFinish(Message message, String response) {
+                YLog.d(message + " , response : "+response);
+            }
+        });
+        rtbManager.staticReport("广告位id", "广告id", new IRTBRequest.Callback() {
+            @Override
+            public void onFinish(Message message, String response) {
+                YLog.d(message + " , response : "+response);
+            }
+        });
+//        staticReport(int slotId, int adId, double lat, double lon,
+//        IRTBRequest.Callback callback)
     }
 }
