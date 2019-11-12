@@ -3,7 +3,7 @@
 
 # gradle依赖
 dependencies {
-    implementation 'com.esell:rtb:0.0.1'
+    implementation 'com.esell:rtb:lastVersion'
 }
 # maven依赖
 
@@ -29,3 +29,22 @@ public void onAd(Message message, List<RtbAD> adList) {
   }
   
 }, new RtbSlot("广告位id", "类型", 1/*数量*/));
+
+#动态上报
+
+        rtbManager.dynamicReport("广告的上报地址", new IRTBRequest.Callback() {
+            @Override
+            public void onFinish(Message message, String response) {
+                YLog.d(message + " , response : "+response);
+            }
+        });
+        
+#静态上报 推荐使用加经纬度参数的请求
+
+        rtbManager.staticReport("广告位id", "广告id", new IRTBRequest.Callback() {
+            @Override
+            public void onFinish(Message message, String response) {
+                YLog.d(message + " , response : "+response);
+            }
+        });
+
