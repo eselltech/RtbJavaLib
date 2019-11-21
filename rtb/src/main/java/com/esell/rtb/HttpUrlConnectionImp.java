@@ -135,6 +135,7 @@ final class HttpUrlConnectionImp implements IRTBRequest {
                 bufferedReader =
                         new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
                 String readResponseBody = readResponseBody(bufferedReader);
+                YLog.d("readResponseBody : "+readResponseBody);
                 callback.onFinish(Message.SUCCESS, readResponseBody);
             } else {
                 callback.onFinish(new Message(responseCode,
