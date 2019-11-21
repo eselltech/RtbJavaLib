@@ -10,7 +10,7 @@ dependencies {
         <dependency>
             <groupId>com.esell</groupId>
             <artifactId>rtb</artifactId>
-            <version>0.0.1</version>
+            <version>lastVersion</version>
             <scope>compile</scope>
         </dependency>
         
