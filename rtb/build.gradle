@@ -8,7 +8,7 @@ uploadArchives {
         mavenDeployer {
             String path = "file://" + getProject().rootDir.absolutePath + File.separator + "repository"
             repository(url: path)
-            pom.version = '0.0.3'
+            pom.version = '0.0.4'
             pom.groupId = 'com.esell'
             pom.artifactId = 'rtb'
         }
@@ -19,7 +19,7 @@ publish {
     userOrg = 'eselltech'//bintray.com用户名
     groupId = 'com.esell'//jcenter上的路径
     artifactId = 'rtb'//项目名称
-    publishVersion = '0.0.3'//版本号
+    publishVersion = '0.0.4'//版本号
     desc = '屏效包广告请求'//描述，不重要
 }
 

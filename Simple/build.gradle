@@ -2,7 +2,7 @@ apply plugin: 'java-library'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.esell:rtb:0.0.2'
+    implementation 'com.esell:rtb:0.0.4'
 }
 
 sourceCompatibility = "7"

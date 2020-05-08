@@ -24,6 +24,7 @@ public class Test {
                 YLog.d(message + "," + adList);
             }
         }, new RtbSlot("广告位id", "类型", 1/*数量*/));
+//        List<RtbAD> rtbADS = rtbManager.requestSync();
 
         rtbManager.dynamicReport("广告的上报地址", new IRTBRequest.Callback() {
             @Override
@@ -31,12 +32,15 @@ public class Test {
                 YLog.d(message + " , response : "+response);
             }
         });
+
+//        rtbManager.dynamicReportSync()
         rtbManager.staticReport("广告位id", "广告id", new IRTBRequest.Callback() {
             @Override
             public void onFinish(Message message, String response) {
                 YLog.d(message + " , response : "+response);
             }
         });
+//        rtbManager.staticReportSync()
 //        staticReport(int slotId, int adId, double lat, double lon,
 //        IRTBRequest.Callback callback)
     }
