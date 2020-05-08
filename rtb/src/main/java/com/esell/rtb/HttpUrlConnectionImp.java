@@ -149,4 +149,36 @@ final class HttpUrlConnectionImp implements IRTBRequest {
         }
     }
 
+    /**
+     * post请求广告
+     *
+     * @param url      路径
+     * @param params   参数
+     */
+    @Override
+    public String post(final String url, final HashMap<String, String> params) {
+        HttpURLConnection httpURLConnection = null;
+        OutputStream outputStream = null;
+        BufferedReader bufferedReader = null;
+        try {
+            httpURLConnection = (HttpURLConnection) new URL(url).openConnection();
+            configConnection(httpURLConnection);
+            httpURLConnection.connect();
+            outputStream = writeParams(httpURLConnection, params);
+            int responseCode = httpURLConnection.getResponseCode();
+            if (HttpURLConnection.HTTP_OK == responseCode) {
+                bufferedReader =
+                        new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+                return readResponseBody(bufferedReader);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            Tools.closeCloseable(outputStream);
+            Tools.closeCloseable(bufferedReader);
+        }
+        return null;
+    }
+
+
 }

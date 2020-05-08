@@ -29,6 +29,8 @@ public interface IRTBRequest {
      */
     void postOnWorkThread(String url, Callback callback);
 
+    String post(final String url, final HashMap<String, String> params);
+
     /**
      * 网络回调
      */

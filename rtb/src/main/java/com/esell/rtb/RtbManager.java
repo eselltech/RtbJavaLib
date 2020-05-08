@@ -177,6 +177,53 @@ public final class RtbManager {
             }
         });
     }
+    /**
+     * 屏效宝广告请求
+     *
+     * @param rtbSlot      屏效宝广告位
+     */
+    public List<RtbAD> requestSync(RtbSlot rtbSlot) {
+        if (rtbSlot == null) {
+            return null;
+        }
+        checkInit();
+        YLog.d("请求广告" + rtbSlot);
+        final long currentTimeMillis = System.currentTimeMillis();
+        /*请求类*/
+        RtbRequestModel rtbRequestBean = new RtbRequestModel(Tools.getLocalIpAddress(),
+                rtbSlot.quantity, rtbSlot.pxbSlotId, rtbSlot.type, unicode);
+        /*对象转json格式*/
+        final String payload = gson.toJson(rtbRequestBean);
+        /*签名格式字符串*/
+        final String signFormatStr = String.format(signFormat, appId, appKey, payload,
+                currentTimeMillis, currentTimeMillis, unicode, VERSION);
+        /*最终签名*/
+        final String sign = Tools.md5Hex(signFormatStr);
+        /*请求路径*/
+        final String url = String.format(urlFormat, URL_AD, appId, currentTimeMillis,
+                currentTimeMillis, unicode, VERSION, sign);
+        HashMap<String, String> params = new HashMap<>();
+        params.put("payload", payload);
+        String response = request.post(url, params);
+        if (response == null) {
+            return null;
+        }
+        Result<List<RtbAD>> result = null;
+        try {
+            result = gson.fromJson(response, new TypeToken<Result<List<RtbAD>>>() {
+            }.getType());
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return null;
+        }
+        if (result == null) {
+            return null;
+        }
+        if (result.isSuccess()) {
+            return result.getPayload();
+        }
+        return null;
+    }
 
     /**
      * 屏效宝广告请求
@@ -224,6 +271,26 @@ public final class RtbManager {
     }
 
     /**
+     * 屏效宝广告请求
+     *
+     * @param rtbSlots     多个广告位
+     */
+    public List<RtbAD> requestSync(RtbSlot[] rtbSlots) {
+        if (rtbSlots == null || rtbSlots.length == 0) {
+            return null;
+        }
+        YLog.d("批量请求广告" + rtbSlots);
+        final List<RtbAD> allAdList = Collections.synchronizedList(new LinkedList<RtbAD>());
+        for (final RtbSlot rtbSlot : rtbSlots) {
+            List<RtbAD> request = requestSync(rtbSlot);
+            if (request != null && !request.isEmpty()) {
+                allAdList.addAll(request);
+            }
+        }
+        return allAdList;
+    }
+
+    /**
      * 静态上报
      *
      * @param slotId 广告位id
@@ -231,6 +298,16 @@ public final class RtbManager {
      */
     public void staticReport(String slotId, String adId, IRTBRequest.Callback callback) {
         staticReport(slotId, adId, 0.0D, 0.0D, callback);
+    }
+
+    /**
+     * 静态上报
+     *
+     * @param slotId 广告位id
+     * @param adId   广告id
+     */
+    public String staticReportSync(String slotId, String adId) {
+        return staticReportSync(slotId, adId, 0.0D, 0.0D);
     }
 
     /**
@@ -261,6 +338,32 @@ public final class RtbManager {
         request.postOnWorkThread(url, callback);
     }
 
+
+    /**
+     * 静态上报
+     *
+     * @param slotId   广告位id
+     * @param adId     广告id
+     * @param lat      经纬度
+     * @param lon      经纬度
+     */
+    public String staticReportSync(String slotId, String adId, double lat, double lon) {
+        checkInit();
+        String mid = "";
+        String uid = unicode;
+        String ip = Tools.getLocalIpAddress();
+        List<String> macList = null;
+        try {
+            macList = Tools.getMacList();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        String mac = macList == null || macList.isEmpty() ? "" : macList.get(0);
+        String tt = simpleDateFormat.format(new Date());
+        String url = String.format(staticUrlFormat, URL_STATIC, slotId, adId, mid, uid, ip, mac,
+                lat, lon, tt);
+        return request.post(url, null);
+    }
     /**
      * 动态上报
      *
@@ -269,5 +372,15 @@ public final class RtbManager {
     public void dynamicReport(String trackUrl, IRTBRequest.Callback callback) {
         checkInit();
         request.postOnWorkThread(trackUrl, callback);
+    }
+
+    /**
+     * 动态上报
+     *
+     * @param trackUrl 上报路径
+     */
+    public String dynamicReportSync(String trackUrl) {
+        checkInit();
+        return request.post(trackUrl, null);
     }
 }
