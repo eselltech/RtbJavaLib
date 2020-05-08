@@ -1,6 +1,10 @@
 # RtbJavaLib
 屏效宝rtb广告
 
+# release
+ 0.0.4  
+    1、添加对应同步方法
+    
 # gradle依赖
 dependencies {
     implementation 'com.esell:rtb:lastVersion'
