@@ -18,6 +18,9 @@ public class Test {
     public static void main(String[] args) {
         RtbManager rtbManager = RtbManager.getInstance();
         rtbManager.init("pxbAppId", "pxbAppKey", "unicode");
+//        rtbManager.init("pxbAppId", "pxbAppKey", "unicode","ip");
+//        rtbManager.init("pxbAppId", "pxbAppKey", "unicode",113.957647,22.544867);
+//        rtbManager.init("pxbAppId", "pxbAppKey", "unicode",113.957647,22.544867,"ip");
         rtbManager.request(new OnAdListener() {
             @Override
             public void onAd(Message message, List<RtbAD> adList) {
