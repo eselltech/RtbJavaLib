@@ -12,6 +12,16 @@ final class RtbRequestModel {
      * ip
      */
     private String ip;
+
+    /**
+     * 设备所处位置经度
+     */
+    private double longitude;
+    /**
+     * 设备所处位置纬度
+     */
+    private double latitude;
+
     /**
      * 数量
      */
@@ -71,12 +81,27 @@ final class RtbRequestModel {
         this.deviceUuid = deviceUuid;
     }
 
-    public RtbRequestModel(String ip, int quantity, String slotId, String type,
+    public RtbRequestModel(int quantity, String slotId, String type,
                            String deviceUuid) {
-        this.ip = ip;
         this.quantity = quantity;
         this.slotId = slotId;
         this.type = type;
         this.deviceUuid = deviceUuid;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 }

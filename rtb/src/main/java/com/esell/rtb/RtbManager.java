@@ -1,6 +1,8 @@
 package com.esell.rtb;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
@@ -76,6 +78,9 @@ public final class RtbManager {
      * json解析框架
      */
     final Gson gson = new Gson();
+    private String ip;
+    private double longitude;
+    private double latitude;
 
     private RtbManager() {
     }
@@ -95,10 +100,46 @@ public final class RtbManager {
      * @param unicode 设备唯一id
      */
     public final void init(String appId, String appKey, String unicode) {
+        init(appId,appKey,unicode,-1,-1,null);
+    }
+    /**
+     * 获取实例
+     *
+     * @param appId   公司对应唯一id
+     * @param appKey  对应key
+     * @param unicode 设备唯一id
+     */
+    public final void init(String appId, String appKey, String unicode,String ip) {
+        init(appId,appKey,unicode,-1,-1,ip);
+    }
+    /**
+     * 获取实例
+     *
+     * @param appId   公司对应唯一id
+     * @param appKey  对应key
+     * @param unicode 设备唯一id
+     */
+    public final void init(String appId, String appKey, String unicode,double longitude,double latitude) {
+        init(appId,appKey,unicode,longitude,latitude,null);
+    }
+    /**
+     * 获取实例
+     *
+     * @param appId   公司对应唯一id
+     * @param appKey  对应key
+     * @param unicode 设备唯一id
+     * @param longitude 经度
+     * @param latitude 纬度
+     * @param ip ip
+     */
+    public final void init(String appId, String appKey, String unicode,double longitude,double latitude,String ip) {
         YLog.d("初始化");
         this.appId = appId;
         this.appKey = appKey;
         this.unicode = unicode;
+        this.longitude = longitude;
+        this.latitude = latitude;
+        this.ip = ip;
     }
 
     /**
@@ -134,11 +175,7 @@ public final class RtbManager {
         }
         YLog.d("请求广告" + rtbSlot);
         final long currentTimeMillis = System.currentTimeMillis();
-        /*请求类*/
-        RtbRequestModel rtbRequestBean = new RtbRequestModel(Tools.getLocalIpAddress(),
-                rtbSlot.quantity, rtbSlot.pxbSlotId, rtbSlot.type, unicode);
-        /*对象转json格式*/
-        final String payload = gson.toJson(rtbRequestBean);
+        final String payload = getPayload(rtbSlot);
         /*签名格式字符串*/
         final String signFormatStr = String.format(signFormat, appId, appKey, payload,
                 currentTimeMillis, currentTimeMillis, unicode, VERSION);
@@ -177,6 +214,30 @@ public final class RtbManager {
             }
         });
     }
+
+    private String getPayload(RtbSlot rtbSlot) {
+        /*请求类*/
+        RtbRequestModel rtbRequestBean = new RtbRequestModel(
+                rtbSlot.quantity, rtbSlot.pxbSlotId, rtbSlot.type, unicode);
+        rtbRequestBean.setIp(ip);
+        rtbRequestBean.setLongitude(longitude);
+        rtbRequestBean.setLatitude(latitude);
+        JsonElement jsonElement = gson.toJsonTree(rtbRequestBean);
+        if (jsonElement.isJsonObject()) {
+            JsonObject jsonObject = jsonElement.getAsJsonObject();
+            if (ip == null || ip.trim().length() == 0) {
+                jsonObject.remove("ip");
+            }
+            if (longitude == -1 || latitude == -1) {
+                jsonObject.remove("longitude");
+                jsonObject.remove("latitude");
+            }
+            /*对象转json格式*/
+            return jsonObject.toString();
+        }
+        return "";
+    }
+
     /**
      * 屏效宝广告请求
      *
@@ -189,11 +250,7 @@ public final class RtbManager {
         checkInit();
         YLog.d("请求广告" + rtbSlot);
         final long currentTimeMillis = System.currentTimeMillis();
-        /*请求类*/
-        RtbRequestModel rtbRequestBean = new RtbRequestModel(Tools.getLocalIpAddress(),
-                rtbSlot.quantity, rtbSlot.pxbSlotId, rtbSlot.type, unicode);
-        /*对象转json格式*/
-        final String payload = gson.toJson(rtbRequestBean);
+        final String payload = getPayload(rtbSlot);
         /*签名格式字符串*/
         final String signFormatStr = String.format(signFormat, appId, appKey, payload,
                 currentTimeMillis, currentTimeMillis, unicode, VERSION);
