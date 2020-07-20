@@ -2,8 +2,10 @@
 屏效宝rtb广告
 
 # release
- 0.0.4  
-    1、添加对应同步方法
+    0.0.5
+        1、添加支持ip、经纬度的初始化方法
+    0.0.4
+        1、添加对应同步方法
     
 # gradle依赖
 dependencies {
@@ -19,20 +21,22 @@ dependencies {
         </dependency>
         
 # 拉取广告
-RtbManager rtbManager = RtbManager.getInstance();
-
-rtbManager.init("pxbAppId", "pxbAppKey", "unicode");
-
-rtbManager.request(new OnAdListener() {
-
-@Override
-public void onAd(Message message, List<RtbAD> adList) {
-
- YLog.d(message + "," + adList);
- 
-  }
-  
-}, new RtbSlot("广告位id", "类型", 1/*数量*/));
+    RtbManager rtbManager = RtbManager.getInstance();
+    
+    rtbManager.init("pxbAppId", "pxbAppKey", "unicode");
+    //        rtbManager.init("pxbAppId", "pxbAppKey", "unicode","ip");
+    //        rtbManager.init("pxbAppId", "pxbAppKey", "unicode",113.957647,22.544867);
+    //        rtbManager.init("pxbAppId", "pxbAppKey", "unicode",113.957647,22.544867,"ip");
+    rtbManager.request(new OnAdListener() {
+    
+    @Override
+    public void onAd(Message message, List<RtbAD> adList) {
+    
+     YLog.d(message + "," + adList);
+     
+      }
+      
+    }, new RtbSlot("广告位id", "类型", 1/*数量*/));
 
 # 动态上报
 
