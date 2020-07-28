@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -26,10 +29,19 @@ import java.util.stream.Collectors;
  * @date 2019/11/8 14:26
  */
 public class Tools {
+
+    /**
+     * 线程池 最大线程数
+     */
+    public static final int maximumPoolSize = 128;
+    /**
+     * 线程池 线程存活时长 秒
+     */
+    public static final long keepAliveTime = 20L;
     /**
      * 线程池
      */
-    public static final ExecutorService POOL = Executors.newCachedThreadPool();
+    public static final ExecutorService POOL =  new ThreadPoolExecutor(0,maximumPoolSize, keepAliveTime,TimeUnit.SECONDS, new SynchronousQueue<Runnable>());
 
     /**
      * 字符串是否为空
