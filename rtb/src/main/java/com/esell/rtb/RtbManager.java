@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Deprecated
 public final class RtbManager {
-    private static final RtbManager mRtbManager = new RtbManager();
+    private static final RtbManager RTB_MANAGER = new RtbManager();
     /**
      * 基本路径
      */
@@ -54,7 +54,6 @@ public final class RtbManager {
 
     final String staticUrlFormat =
             "%s?sid=%s&aid=%s&mid=%s&uid=%s&ip=%s&mac=%s&lat=%s&lon=%s&tt" + "=%s";
-    final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHH");
     /**
      * 屏效宝广告默认版本
      */
@@ -91,7 +90,7 @@ public final class RtbManager {
      * 获取实例
      */
     public static RtbManager getInstance() {
-        return mRtbManager;
+        return RTB_MANAGER;
     }
 
     /**
@@ -186,7 +185,7 @@ public final class RtbManager {
         /*请求路径*/
         final String url = String.format(urlFormat, URL_AD, appId, currentTimeMillis,
                 currentTimeMillis, unicode, VERSION, sign);
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, String> params = new HashMap<>(1);
         params.put("payload", payload);
         request.postOnWorkThread(url, params, new IRTBRequest.Callback() {
             @Override
@@ -261,7 +260,7 @@ public final class RtbManager {
         /*请求路径*/
         final String url = String.format(urlFormat, URL_AD, appId, currentTimeMillis,
                 currentTimeMillis, unicode, VERSION, sign);
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, String> params = new HashMap<>(1);
         params.put("payload", payload);
         String response = request.post(url, params);
         if (response == null) {
@@ -302,7 +301,7 @@ public final class RtbManager {
         YLog.d("批量请求广告" + Arrays.toString(rtbSlots));
         final CountDownLatch countDownLatch = new CountDownLatch(rtbSlots.length);
         final List<RtbAD> allAdList = Collections.synchronizedList(new LinkedList<RtbAD>());
-        Tools.pool.execute(new Runnable() {
+        Tools.POOL.execute(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -391,7 +390,7 @@ public final class RtbManager {
             e.printStackTrace();
         }
         String mac = macList == null || macList.isEmpty() ? "" : macList.get(0);
-        String tt = simpleDateFormat.format(new Date());
+        String tt = new SimpleDateFormat("yyyyMMddHH").format(new Date());
         String url = String.format(staticUrlFormat, URL_STATIC, slotId, adId, mid, uid, ip, mac,
                 lat, lon, tt);
         request.postOnWorkThread(url, callback);
@@ -418,7 +417,7 @@ public final class RtbManager {
             e.printStackTrace();
         }
         String mac = macList == null || macList.isEmpty() ? "" : macList.get(0);
-        String tt = simpleDateFormat.format(new Date());
+        String tt = new SimpleDateFormat("yyyyMMddHH").format(new Date());
         String url = String.format(staticUrlFormat, URL_STATIC, slotId, adId, mid, uid, ip, mac,
                 lat, lon, tt);
         return request.post(url, null);

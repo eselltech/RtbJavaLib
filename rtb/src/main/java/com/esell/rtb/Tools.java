@@ -29,7 +29,7 @@ public class Tools {
     /**
      * 线程池
      */
-    public static final ExecutorService pool = Executors.newCachedThreadPool();
+    public static final ExecutorService POOL = Executors.newCachedThreadPool();
 
     /**
      * 字符串是否为空

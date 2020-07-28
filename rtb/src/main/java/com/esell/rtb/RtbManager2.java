@@ -22,7 +22,7 @@ import static com.esell.rtb.Message.FAILED_RESPONSE_JSON_SYNTAX;
  * @date 2019/11/8 14:06
  */
 public final class RtbManager2 {
-    private static final RtbManager2 mRtbManager = new RtbManager2();
+    private static final RtbManager2 RTB_MANAGER = new RtbManager2();
     /**
      * 基本路径
      */
@@ -52,7 +52,6 @@ public final class RtbManager2 {
 
     final String staticUrlFormat =
             "%s?sid=%s&aid=%s&mid=%s&uid=%s&ip=%s&mac=%s&lat=%s&lon=%s&tt" + "=%s";
-    final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHH");
     /**
      * 屏效宝广告默认版本
      */
@@ -82,7 +81,7 @@ public final class RtbManager2 {
      * 获取实例
      */
     public static RtbManager2 getInstance() {
-        return mRtbManager;
+        return RTB_MANAGER;
     }
 
     /**
@@ -121,7 +120,7 @@ public final class RtbManager2 {
             YLog.e("onAdListener == null");
             return;
         }
-        Tools.pool.execute(new Runnable() {
+        Tools.POOL.execute(new Runnable() {
             @Override
             public void run() {
                 Response response = requestSync(rtbSlot, device);
@@ -144,7 +143,7 @@ public final class RtbManager2 {
             YLog.e("onAdListener == null");
             return;
         }
-        Tools.pool.execute(new Runnable() {
+        Tools.POOL.execute(new Runnable() {
             @Override
             public void run() {
                 List<Response> list = requestSync(rtbSlots, device);
@@ -213,7 +212,7 @@ public final class RtbManager2 {
         /*请求路径*/
         final String url = String.format(urlFormat, URL_AD, appId, currentTimeMillis,
                 currentTimeMillis, unicode, VERSION, sign);
-        HashMap<String, String> params = new HashMap<>();
+        HashMap<String, String> params = new HashMap<>(1);
         params.put("payload", payload);
         String response;
         try {
@@ -308,7 +307,7 @@ public final class RtbManager2 {
             e.printStackTrace();
         }
         String mac = macList == null || macList.isEmpty() ? "" : macList.get(0);
-        String tt = simpleDateFormat.format(new Date());
+        String tt = new SimpleDateFormat("yyyyMMddHH").format(new Date());
         String url = String.format(staticUrlFormat, URL_STATIC, slotId, adId, mid, uid, ip, mac,
                 lat, lon, tt);
         request.postOnWorkThread(url, callback);
@@ -338,7 +337,7 @@ public final class RtbManager2 {
             e.printStackTrace();
         }
         String mac = macList == null || macList.isEmpty() ? "" : macList.get(0);
-        String tt = simpleDateFormat.format(new Date());
+        String tt = new SimpleDateFormat("yyyyMMddHH").format(new Date());
         String url = String.format(staticUrlFormat, URL_STATIC, slotId, adId, mid, uid, ip, mac,
                 lat, lon, tt);
         return request.post(url, null);

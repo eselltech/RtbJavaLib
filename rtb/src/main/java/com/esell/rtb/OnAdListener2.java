@@ -9,7 +9,8 @@ import java.util.List;
  */
 public interface OnAdListener2 {
     /**
-     * @param list
+     * 响应回调
+     * @param list 响应列表
      */
     void onResponse(List<Response> list);
 }

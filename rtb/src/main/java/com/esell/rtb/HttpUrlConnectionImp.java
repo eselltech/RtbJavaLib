@@ -20,7 +20,7 @@ final class HttpUrlConnectionImp implements IRTBRequest {
     @Override
     public void postOnWorkThread(final String url, final HashMap<String, String> params,
                                  final Callback callback) {
-        Tools.pool.execute(new Runnable() {
+        Tools.POOL.execute(new Runnable() {
             @Override
             public void run() {
                 post(url, params, callback);

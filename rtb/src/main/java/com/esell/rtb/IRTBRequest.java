@@ -29,8 +29,22 @@ public interface IRTBRequest {
      */
     void postOnWorkThread(String url, Callback callback);
 
+    /**
+     * post 请求
+     * @param url 路径
+     * @param params 参数
+     * @return
+     */
     @Deprecated
     String post(final String url, final HashMap<String, String> params);
+
+    /**
+     * post 请求
+     * @param url 路径
+     * @param params 参数
+     * @return
+     * @throws Exception
+     */
     String post2(final String url, final HashMap<String, String> params) throws Exception;
 
     /**
@@ -38,6 +52,7 @@ public interface IRTBRequest {
      */
     interface Callback {
         /**
+         * 回调
          * @param message  信息
          * @param response 响应
          */
