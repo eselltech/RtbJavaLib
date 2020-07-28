@@ -1,7 +1,5 @@
 package com.esell.rtb;
 
-import com.google.gson.Gson;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -18,10 +16,6 @@ import java.util.HashMap;
  * @date 2019/11/8 15:22
  */
 final class HttpUrlConnectionImp implements IRTBRequest {
-    /**
-     * json解析框架
-     */
-    final Gson gson = new Gson();
 
     @Override
     public void postOnWorkThread(final String url, final HashMap<String, String> params,
@@ -97,7 +91,7 @@ final class HttpUrlConnectionImp implements IRTBRequest {
                 paramsBuilder.append("&");
             }
             paramsBuilder.deleteCharAt(paramsBuilder.length() - 1);
-            YLog.d("paramsBuilder : "+paramsBuilder.toString());
+            YLog.d("paramsBuilder : " + paramsBuilder.toString());
             outputStream.write(paramsBuilder.toString().getBytes("UTF-8"));
             paramsBuilder.setLength(0);
             outputStream.flush();
@@ -135,7 +129,7 @@ final class HttpUrlConnectionImp implements IRTBRequest {
                 bufferedReader =
                         new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
                 String readResponseBody = readResponseBody(bufferedReader);
-                YLog.d("readResponseBody : "+readResponseBody);
+                YLog.d("readResponseBody : " + readResponseBody);
                 callback.onFinish(Message.SUCCESS, readResponseBody);
             } else {
                 callback.onFinish(new Message(responseCode,
@@ -152,11 +146,21 @@ final class HttpUrlConnectionImp implements IRTBRequest {
     /**
      * post请求广告
      *
-     * @param url      路径
-     * @param params   参数
+     * @param url    路径
+     * @param params 参数
      */
     @Override
     public String post(final String url, final HashMap<String, String> params) {
+        try {
+            return post2(url, params);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public String post2(String url, HashMap<String, String> params) throws Exception {
         HttpURLConnection httpURLConnection = null;
         OutputStream outputStream = null;
         BufferedReader bufferedReader = null;
@@ -173,6 +177,7 @@ final class HttpUrlConnectionImp implements IRTBRequest {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            throw e;
         } finally {
             Tools.closeCloseable(outputStream);
             Tools.closeCloseable(bufferedReader);

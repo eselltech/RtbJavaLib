@@ -7,13 +7,12 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.text.SimpleDateFormat;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+
+import static com.esell.rtb.Message.FAILED_RESPONSE_JSON_SYNTAX;
 
 /**
  * rtb管理
@@ -115,65 +114,45 @@ public final class RtbManager2 {
      * @param rtbSlot      屏效宝广告位
      * @param device       设备
      */
-    public void request(final OnAdListener onAdListener, RtbSlot rtbSlot, Device device) {
-        checkInit();
+    public void request(final OnAdListener onAdListener, final RtbSlot rtbSlot,
+                        final Device device) {
         if (onAdListener == null) {
             YLog.e("onAdListener == null");
             return;
         }
-        if (device == null) {
-            onAdListener.onAd(Message.FAILED_DEVICE_NULL, null);
-            return;
-        }
-        if (rtbSlot == null) {
-            onAdListener.onAd(Message.FAILED_UNLINK_SLOT, null);
-            return;
-        }
-        YLog.d("请求广告" + rtbSlot);
-        final String unicode = device.getUnicode();
-
-        final long currentTimeMillis = System.currentTimeMillis();
-        final String payload = getPayload(rtbSlot, device);
-        /*签名格式字符串*/
-        final String signFormatStr = String.format(signFormat, appId, appKey, payload,
-                currentTimeMillis, currentTimeMillis, unicode, VERSION);
-        /*最终签名*/
-        final String sign = Tools.md5Hex(signFormatStr);
-        /*请求路径*/
-        final String url = String.format(urlFormat, URL_AD, appId, currentTimeMillis,
-                currentTimeMillis, unicode, VERSION, sign);
-        HashMap<String, String> params = new HashMap<>();
-        params.put("payload", payload);
-        request.postOnWorkThread(url, params, new IRTBRequest.Callback() {
+        Tools.pool.execute(new Runnable() {
             @Override
-            public void onFinish(Message message, String response) {
-                if (Message.SUCCESS.equals(message)) {
-                    Result<List<RtbAD>> result = null;
-                    try {
-                        result = gson.fromJson(response, new TypeToken<Result<List<RtbAD>>>() {
-                        }.getType());
-                    } catch (JsonSyntaxException e) {
-                        e.printStackTrace();
-                        onAdListener.onAd(new Message("JsonSyntaxException".hashCode(),
-                                Tools.throwable2String(e)), null);
-                        return;
-                    }
-                    if (result == null) {
-                        onAdListener.onAd(new Message("result == null".hashCode(),
-                                "result == " + "null"), null);
-                        return;
-                    }
-                    if (result.isSuccess()) {
-                        onAdListener.onAd(message, result.getPayload());
-                        return;
-                    }
-                }
-                onAdListener.onAd(message, null);
+            public void run() {
+                Response response = requestSync(rtbSlot, device);
+                onAdListener.onAd(response.message, response.list);
             }
         });
     }
 
-    private String getPayload(RtbSlot rtbSlot, Device device) {
+
+    /**
+     * 屏效宝广告请求
+     *
+     * @param onAdListener 广告监听
+     * @param rtbSlots     多个广告位
+     * @param device       设备
+     */
+    public void request(final OnAdListener2 onAdListener, final RtbSlot[] rtbSlots,
+                        final Device device) {
+        if (onAdListener == null) {
+            YLog.e("onAdListener == null");
+            return;
+        }
+        Tools.pool.execute(new Runnable() {
+            @Override
+            public void run() {
+                List<Response> list = requestSync(rtbSlots, device);
+                onAdListener.onResponse(list);
+            }
+        });
+    }
+
+    private final String getPayload(RtbSlot rtbSlot, Device device) {
         /*请求类*/
         RtbRequestModel rtbRequestBean = new RtbRequestModel(rtbSlot.quantity, rtbSlot.pxbSlotId,
                 rtbSlot.type, device.getUnicode());
@@ -204,16 +183,23 @@ public final class RtbManager2 {
      *
      * @param rtbSlot 屏效宝广告位
      * @param device  设备
-     * @return
+     * @return 响应
      */
-    public List<RtbAD> requestSync(RtbSlot rtbSlot, Device device) {
+    public Response requestSync(RtbSlot rtbSlot, Device device) {
+        Response response = requestSyncInternal(rtbSlot, device);
+        response.setPxbSlotId(rtbSlot.pxbSlotId);
+        response.setUnicode(device.getUnicode());
+        return response;
+    }
+
+    private final Response requestSyncInternal(RtbSlot rtbSlot, Device device) {
+        checkInit();
         if (rtbSlot == null) {
-            return null;
+            return new Response(Message.FAILED_UNLINK_SLOT, null);
         }
         if (device == null) {
-            return null;
+            return new Response(Message.FAILED_DEVICE_NULL, null);
         }
-        checkInit();
         String unicode = device.getUnicode();
         YLog.d("请求广告" + rtbSlot);
         final long currentTimeMillis = System.currentTimeMillis();
@@ -228,9 +214,13 @@ public final class RtbManager2 {
                 currentTimeMillis, unicode, VERSION, sign);
         HashMap<String, String> params = new HashMap<>();
         params.put("payload", payload);
-        String response = request.post(url, params);
-        if (response == null) {
-            return null;
+        String response = null;
+        try {
+            response = request.post2(url, params);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Response(new Message(Message.FAILED_REQUEST_EXCEPTION.code,
+                    e.getMessage()), null);
         }
         Result<List<RtbAD>> result = null;
         try {
@@ -238,64 +228,16 @@ public final class RtbManager2 {
             }.getType());
         } catch (JsonSyntaxException e) {
             e.printStackTrace();
-            return null;
+            return new Response(new Message(FAILED_RESPONSE_JSON_SYNTAX.code, e.getMessage()),
+                    null);
         }
         if (result == null) {
-            return null;
+            return new Response(Message.FAILED_RESPONSE_RESULT_NULL, null);
         }
         if (result.isSuccess()) {
-            return result.getPayload();
+            return new Response(Message.SUCCESS, result.getPayload());
         }
-        return null;
-    }
-
-    /**
-     * 屏效宝广告请求
-     *
-     * @param onAdListener 广告监听
-     * @param rtbSlots     多个广告位
-     */
-    public void request(final OnAdListener onAdListener, Device device, RtbSlot... rtbSlots) {
-        if (onAdListener == null) {
-            YLog.e("onAdListener == null");
-            return;
-        }
-        if (rtbSlots == null || rtbSlots.length == 0) {
-            onAdListener.onAd(Message.FAILED_UNLINK_SLOT, null);
-            return;
-        }
-        if (device == null) {
-            onAdListener.onAd(Message.FAILED_DEVICE_NULL, null);
-            return;
-        }
-        YLog.d("批量请求广告" + rtbSlots);
-        final CountDownLatch countDownLatch = new CountDownLatch(rtbSlots.length);
-        final List<RtbAD> allAdList = Collections.synchronizedList(new LinkedList<RtbAD>());
-        Tools.pool.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    countDownLatch.await(IRTBRequest.TIMEOUT, TimeUnit.MILLISECONDS);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } finally {
-                    onAdListener.onAd(Message.SUCCESS, allAdList);
-                }
-            }
-        });
-        for (final RtbSlot rtbSlot : rtbSlots) {
-            request(new OnAdListener() {
-                @Override
-                public void onAd(Message message, List<RtbAD> adList) {
-                    if (Message.SUCCESS.equals(message) && adList != null) {
-                        allAdList.addAll(adList);
-                    } else {
-                        YLog.d(rtbSlot.toString() + " " + message.toString());
-                    }
-                    countDownLatch.countDown();
-                }
-            }, rtbSlot, device);
-        }
+        return new Response(Message.FAILED, null);
     }
 
     /**
@@ -303,19 +245,17 @@ public final class RtbManager2 {
      *
      * @param rtbSlots 多个广告位
      */
-    public List<RtbAD> requestSync(RtbSlot[] rtbSlots, Device device) {
+    public List<Response> requestSync(RtbSlot[] rtbSlots, Device device) {
         if (rtbSlots == null || rtbSlots.length == 0) {
             return null;
         }
         YLog.d("批量请求广告" + rtbSlots);
-        final List<RtbAD> allAdList = Collections.synchronizedList(new LinkedList<RtbAD>());
+        List<Response> list = new ArrayList<>();
         for (final RtbSlot rtbSlot : rtbSlots) {
-            List<RtbAD> request = requestSync(rtbSlot, device);
-            if (request != null && !request.isEmpty()) {
-                allAdList.addAll(request);
-            }
+            Response response = requestSync(rtbSlot, device);
+            list.add(response);
         }
-        return allAdList;
+        return list;
     }
 
     /**

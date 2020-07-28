@@ -29,7 +29,9 @@ public interface IRTBRequest {
      */
     void postOnWorkThread(String url, Callback callback);
 
+    @Deprecated
     String post(final String url, final HashMap<String, String> params);
+    String post2(final String url, final HashMap<String, String> params) throws Exception;
 
     /**
      * 网络回调
