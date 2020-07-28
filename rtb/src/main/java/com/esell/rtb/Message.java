@@ -22,6 +22,11 @@ public class Message {
      */
     static Message FAILED_URL_EMPTY = new Message(-2, "url 为空");
 
+    /**
+     * 失败 请求设备为空
+     */
+    static Message FAILED_DEVICE_NULL = new Message(-728, "请求设备为空");
+
     public int code;
     public String message;
 

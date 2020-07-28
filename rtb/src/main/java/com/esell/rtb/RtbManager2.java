@@ -17,13 +17,12 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * rtb管理
- * 因服务端多设备unicode特性 替换为{@link RtbManager2}
+ *
  * @author NiuLei
  * @date 2019/11/8 14:06
  */
-@Deprecated
-public final class RtbManager {
-    private static final RtbManager mRtbManager = new RtbManager();
+public final class RtbManager2 {
+    private static final RtbManager2 mRtbManager = new RtbManager2();
     /**
      * 基本路径
      */
@@ -66,10 +65,6 @@ public final class RtbManager {
      * 对应key
      */
     private String appKey;
-    /**
-     * 设备唯一id
-     */
-    private String unicode;
 
     /**
      * 广告请求
@@ -79,68 +74,26 @@ public final class RtbManager {
      * json解析框架
      */
     final Gson gson = new Gson();
-    private String ip;
-    private double longitude;
-    private double latitude;
 
-    private RtbManager() {
+    private RtbManager2() {
     }
 
     /**
      * 获取实例
      */
-    public static RtbManager getInstance() {
+    public static RtbManager2 getInstance() {
         return mRtbManager;
     }
 
     /**
      * 获取实例
      *
-     * @param appId   公司对应唯一id
-     * @param appKey  对应key
-     * @param unicode 设备唯一id
+     * @param appId  公司对应唯一id
+     * @param appKey 对应key
      */
-    public final void init(String appId, String appKey, String unicode) {
-        init(appId,appKey,unicode,-1,-1,null);
-    }
-    /**
-     * 获取实例
-     *
-     * @param appId   公司对应唯一id
-     * @param appKey  对应key
-     * @param unicode 设备唯一id
-     */
-    public final void init(String appId, String appKey, String unicode,String ip) {
-        init(appId,appKey,unicode,-1,-1,ip);
-    }
-    /**
-     * 获取实例
-     *
-     * @param appId   公司对应唯一id
-     * @param appKey  对应key
-     * @param unicode 设备唯一id
-     */
-    public final void init(String appId, String appKey, String unicode,double longitude,double latitude) {
-        init(appId,appKey,unicode,longitude,latitude,null);
-    }
-    /**
-     * 获取实例
-     *
-     * @param appId   公司对应唯一id
-     * @param appKey  对应key
-     * @param unicode 设备唯一id
-     * @param longitude 经度
-     * @param latitude 纬度
-     * @param ip ip
-     */
-    public final void init(String appId, String appKey, String unicode,double longitude,double latitude,String ip) {
-        YLog.d("初始化");
+    public final void init(String appId, String appKey) {
         this.appId = appId;
         this.appKey = appKey;
-        this.unicode = unicode;
-        this.longitude = longitude;
-        this.latitude = latitude;
-        this.ip = ip;
     }
 
     /**
@@ -153,9 +106,6 @@ public final class RtbManager {
         if (Tools.isEmpty(appKey)) {
             throw new IllegalArgumentException(String.format(illegalArgumentFormat, "appKey"));
         }
-        if (Tools.isEmpty(unicode)) {
-            throw new IllegalArgumentException(String.format(illegalArgumentFormat, "unicode"));
-        }
     }
 
     /**
@@ -163,11 +113,16 @@ public final class RtbManager {
      *
      * @param onAdListener 广告监听
      * @param rtbSlot      屏效宝广告位
+     * @param device       设备
      */
-    public void request(final OnAdListener onAdListener, RtbSlot rtbSlot) {
+    public void request(final OnAdListener onAdListener, RtbSlot rtbSlot, Device device) {
         checkInit();
         if (onAdListener == null) {
             YLog.e("onAdListener == null");
+            return;
+        }
+        if (device == null) {
+            onAdListener.onAd(Message.FAILED_DEVICE_NULL, null);
             return;
         }
         if (rtbSlot == null) {
@@ -175,8 +130,10 @@ public final class RtbManager {
             return;
         }
         YLog.d("请求广告" + rtbSlot);
+        final String unicode = device.getUnicode();
+
         final long currentTimeMillis = System.currentTimeMillis();
-        final String payload = getPayload(rtbSlot);
+        final String payload = getPayload(rtbSlot, device);
         /*签名格式字符串*/
         final String signFormatStr = String.format(signFormat, appId, appKey, payload,
                 currentTimeMillis, currentTimeMillis, unicode, VERSION);
@@ -216,10 +173,13 @@ public final class RtbManager {
         });
     }
 
-    private String getPayload(RtbSlot rtbSlot) {
+    private String getPayload(RtbSlot rtbSlot, Device device) {
         /*请求类*/
-        RtbRequestModel rtbRequestBean = new RtbRequestModel(
-                rtbSlot.quantity, rtbSlot.pxbSlotId, rtbSlot.type, unicode);
+        RtbRequestModel rtbRequestBean = new RtbRequestModel(rtbSlot.quantity, rtbSlot.pxbSlotId,
+                rtbSlot.type, device.getUnicode());
+        String ip = device.getIp();
+        double latitude = device.getLatitude();
+        double longitude = device.getLongitude();
         rtbRequestBean.setIp(ip);
         rtbRequestBean.setLongitude(longitude);
         rtbRequestBean.setLatitude(latitude);
@@ -242,16 +202,22 @@ public final class RtbManager {
     /**
      * 屏效宝广告请求
      *
-     * @param rtbSlot      屏效宝广告位
+     * @param rtbSlot 屏效宝广告位
+     * @param device  设备
+     * @return
      */
-    public List<RtbAD> requestSync(RtbSlot rtbSlot) {
+    public List<RtbAD> requestSync(RtbSlot rtbSlot, Device device) {
         if (rtbSlot == null) {
             return null;
         }
+        if (device == null) {
+            return null;
+        }
         checkInit();
+        String unicode = device.getUnicode();
         YLog.d("请求广告" + rtbSlot);
         final long currentTimeMillis = System.currentTimeMillis();
-        final String payload = getPayload(rtbSlot);
+        final String payload = getPayload(rtbSlot, device);
         /*签名格式字符串*/
         final String signFormatStr = String.format(signFormat, appId, appKey, payload,
                 currentTimeMillis, currentTimeMillis, unicode, VERSION);
@@ -289,13 +255,17 @@ public final class RtbManager {
      * @param onAdListener 广告监听
      * @param rtbSlots     多个广告位
      */
-    public void request(final OnAdListener onAdListener, RtbSlot... rtbSlots) {
+    public void request(final OnAdListener onAdListener, Device device, RtbSlot... rtbSlots) {
         if (onAdListener == null) {
             YLog.e("onAdListener == null");
             return;
         }
         if (rtbSlots == null || rtbSlots.length == 0) {
             onAdListener.onAd(Message.FAILED_UNLINK_SLOT, null);
+            return;
+        }
+        if (device == null) {
+            onAdListener.onAd(Message.FAILED_DEVICE_NULL, null);
             return;
         }
         YLog.d("批量请求广告" + rtbSlots);
@@ -324,23 +294,23 @@ public final class RtbManager {
                     }
                     countDownLatch.countDown();
                 }
-            }, rtbSlot);
+            }, rtbSlot, device);
         }
     }
 
     /**
      * 屏效宝广告请求
      *
-     * @param rtbSlots     多个广告位
+     * @param rtbSlots 多个广告位
      */
-    public List<RtbAD> requestSync(RtbSlot[] rtbSlots) {
+    public List<RtbAD> requestSync(RtbSlot[] rtbSlots, Device device) {
         if (rtbSlots == null || rtbSlots.length == 0) {
             return null;
         }
         YLog.d("批量请求广告" + rtbSlots);
         final List<RtbAD> allAdList = Collections.synchronizedList(new LinkedList<RtbAD>());
         for (final RtbSlot rtbSlot : rtbSlots) {
-            List<RtbAD> request = requestSync(rtbSlot);
+            List<RtbAD> request = requestSync(rtbSlot, device);
             if (request != null && !request.isEmpty()) {
                 allAdList.addAll(request);
             }
@@ -351,33 +321,39 @@ public final class RtbManager {
     /**
      * 静态上报
      *
-     * @param slotId 广告位id
-     * @param adId   广告id
+     * @param unicode  唯一标识
+     * @param slotId   广告位id
+     * @param adId     广告id
+     * @param callback
      */
-    public void staticReport(String slotId, String adId, IRTBRequest.Callback callback) {
-        staticReport(slotId, adId, 0.0D, 0.0D, callback);
+    public void staticReport(String unicode, String slotId, String adId,
+                             IRTBRequest.Callback callback) {
+        staticReport(unicode, slotId, adId, 0.0D, 0.0D, callback);
     }
 
     /**
      * 静态上报
      *
-     * @param slotId 广告位id
-     * @param adId   广告id
+     * @param unicode 唯一标识
+     * @param slotId  广告位id
+     * @param adId    广告id
+     * @return
      */
-    public String staticReportSync(String slotId, String adId) {
-        return staticReportSync(slotId, adId, 0.0D, 0.0D);
+    public String staticReportSync(String unicode, String slotId, String adId) {
+        return staticReportSync(unicode, slotId, adId, 0.0D, 0.0D);
     }
 
     /**
      * 静态上报
      *
+     * @param unicode  唯一标识
      * @param slotId   广告位id
      * @param adId     广告id
      * @param lat      经纬度
      * @param lon      经纬度
      * @param callback 回调
      */
-    public void staticReport(String slotId, String adId, double lat, double lon,
+    public void staticReport(String unicode, String slotId, String adId, double lat, double lon,
                              IRTBRequest.Callback callback) {
         checkInit();
         String mid = "";
@@ -400,12 +376,15 @@ public final class RtbManager {
     /**
      * 静态上报
      *
-     * @param slotId   广告位id
-     * @param adId     广告id
-     * @param lat      经纬度
-     * @param lon      经纬度
+     * @param unicode 唯一标识
+     * @param slotId  广告位id
+     * @param adId    广告id
+     * @param lat     经纬度
+     * @param lon     经纬度
+     * @return
      */
-    public String staticReportSync(String slotId, String adId, double lat, double lon) {
+    public String staticReportSync(String unicode, String slotId, String adId, double lat,
+                                   double lon) {
         checkInit();
         String mid = "";
         String uid = unicode;
@@ -422,6 +401,7 @@ public final class RtbManager {
                 lat, lon, tt);
         return request.post(url, null);
     }
+
     /**
      * 动态上报
      *
