@@ -2,6 +2,8 @@
 屏效宝rtb广告
 
 # release
+    0.0.7
+        1、静态代码检测优化
     0.0.6
         1、废弃RtbManager 改用RtbManager2 支持多设备
         2、添加同步请求响应
