@@ -39,7 +39,7 @@ public class Device {
         this.latitude = latitude;
     }
 
-    public Device(String unicode, String ip, double longitude, double latitude) {
+    public Device(String unicode,double longitude, double latitude,String ip) {
         this.unicode = unicode;
         this.ip = ip;
         this.longitude = longitude;
