@@ -29,18 +29,14 @@ public class Test {
 //        new Device("unicode","ip"));
 //        new Device("unicode",113.957647,22.544867));
 //        new Device("unicode",113.957647,22.544867,"ip"));
-
 //        rtbManager2.requestSync();
-
 //        rtbManager2.dynamicReport("广告的上报地址", new IRTBRequest.Callback() {
 //            @Override
 //            public void onFinish(Message message, String response) {
 //                YLog.d(message + " , response : "+response);
 //            }
 //        });
-//
 //        rtbManager2.dynamicReportSync();
-//
 //        rtbManager2.staticReport("设备唯一标识","广告位id", "广告id", new IRTBRequest.Callback() {
 //            @Override
 //            public void onFinish(Message message, String response) {

@@ -24,22 +24,20 @@ dependencies {
         </dependency>
         
 # 拉取广告
-    RtbManager rtbManager = RtbManager.getInstance();
-    
-    rtbManager.init("pxbAppId", "pxbAppKey", "unicode");
-    //        rtbManager.init("pxbAppId", "pxbAppKey", "unicode","ip");
-    //        rtbManager.init("pxbAppId", "pxbAppKey", "unicode",113.957647,22.544867);
-    //        rtbManager.init("pxbAppId", "pxbAppKey", "unicode",113.957647,22.544867,"ip");
-    rtbManager.request(new OnAdListener() {
-    
-    @Override
-    public void onAd(Message message, List<RtbAD> adList) {
-    
-     YLog.d(message + "," + adList);
-     
-      }
-      
-    }, new RtbSlot("广告位id", "类型", 1/*数量*/));
+        RtbManager2 rtbManager2 = RtbManager2.getInstance();
+        rtbManager2.init("pxbAppId", "pxbAppKey");
+        rtbManager2.request(new OnAdListener() {
+            @Override
+            public void onAd(Message message, List<RtbAD> adList) {
+                YLog.d(message + "," + adList);
+            }
+        },
+        new RtbSlot("广告位id", "类型", 1/*数量*/),
+        new Device("unicode"));
+    //        new Device("unicode","ip"));
+    //        new Device("unicode",113.957647,22.544867));
+    //        new Device("unicode",113.957647,22.544867,"ip"));
+    //        rtbManager2.requestSync();
 
 # 动态上报
 
@@ -52,7 +50,7 @@ dependencies {
         
 # 静态上报 推荐使用加经纬度参数的请求
 
-        rtbManager.staticReport("广告位id", "广告id", new IRTBRequest.Callback() {
+        rtbManager.staticReport("设备唯一标识","广告位id", "广告id", new IRTBRequest.Callback() {
             @Override
             public void onFinish(Message message, String response) {
                 YLog.d(message + " , response : "+response);
