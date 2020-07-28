@@ -10,20 +10,6 @@ import com.google.gson.annotations.SerializedName;
  */
 public class RtbAD {
     /**
-     * ad-id : 10661
-     * show-time : 15
-     * track-url : http://api6.pingxiaobao.com/v3/af8548dcbd3f0fb946a1aa33b82b699946484841.shtm
-     * slot-id : 25075489
-     * width : 1922
-     * file-size : 359750
-     * sign : a854e730c8f2cdd8573dcde7e35640bc
-     * expire-time : 2019-10-31 23:59:59
-     * type : IMG
-     * url : https://file2.pingxiaobao.com/prd/1910/18/5038ce22045829ba145cf2fdafc342db.jpg
-     * height : 1082
-     */
-
-    /**
      * 广告id
      */
     @SerializedName("ad-id")
@@ -172,7 +158,7 @@ public class RtbAD {
 
     @Override
     public boolean equals(Object obj) {
-        return obj != null && obj instanceof RtbAD && obj.hashCode() == hashCode();
+        return obj instanceof RtbAD && obj.hashCode() == hashCode();
     }
 
     @Override

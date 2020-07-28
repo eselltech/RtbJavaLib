@@ -42,7 +42,7 @@ final class HttpUrlConnectionImp implements IRTBRequest {
      */
     private String readResponseBody(BufferedReader bufferedReader) throws IOException {
         final StringBuilder stringBuilder = new StringBuilder(1024);
-        String line = null;
+        String line;
         while ((line = bufferedReader.readLine()) != null) {
             stringBuilder.append(line);
         }
@@ -116,7 +116,7 @@ final class HttpUrlConnectionImp implements IRTBRequest {
             callback.onFinish(Message.FAILED_URL_EMPTY, null);
             return;
         }
-        HttpURLConnection httpURLConnection = null;
+        HttpURLConnection httpURLConnection;
         OutputStream outputStream = null;
         BufferedReader bufferedReader = null;
         try {
@@ -161,7 +161,7 @@ final class HttpUrlConnectionImp implements IRTBRequest {
 
     @Override
     public String post2(String url, HashMap<String, String> params) throws Exception {
-        HttpURLConnection httpURLConnection = null;
+        HttpURLConnection httpURLConnection;
         OutputStream outputStream = null;
         BufferedReader bufferedReader = null;
         try {

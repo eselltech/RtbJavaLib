@@ -14,6 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -57,7 +58,7 @@ public class Tools {
         InetAddress ip;
         Enumeration<InetAddress> address;
         // 遍历网卡设备
-        while (interfaces.hasMoreElements()) {
+        while (Objects.requireNonNull(interfaces).hasMoreElements()) {
             NetworkInterface networkInterface = interfaces.nextElement();
             try {
                 //过滤掉 loopback设备、虚拟网卡
@@ -68,12 +69,9 @@ public class Tools {
                 e.printStackTrace();
             }
             address = networkInterface.getInetAddresses();
-            if (address == null) {
-                continue;
-            }
             while (address.hasMoreElements()) {
                 ip = address.nextElement();
-                if (!ip.isLoopbackAddress() && ip.isSiteLocalAddress() && ip.getHostAddress().indexOf(":") == -1) {
+                if (!ip.isLoopbackAddress() && ip.isSiteLocalAddress() && !ip.getHostAddress().contains(":")) {
                     try {
                         clientIP = ip.toString().split("/")[1];
                     } catch (ArrayIndexOutOfBoundsException e) {
@@ -112,7 +110,7 @@ public class Tools {
         if (tmpMacList.size() <= 0) {
             return tmpMacList;
         }
-        /***去重，别忘了同一个网卡的ipv4,ipv6得到的mac都是一样的，肯定有重复，下面这段代码是。。流式处理***/
+        /*去重，别忘了同一个网卡的ipv4,ipv6得到的mac都是一样的，肯定有重复，下面这段代码是。。流式处理*/
         List<Object> collect = tmpMacList.stream().distinct().collect(Collectors.toList());
         tmpMacList.clear();
         for (Object o : collect) {
@@ -148,10 +146,6 @@ public class Tools {
             out[j++] = DIGITS_LOWER[15 & hash[i]];
         }
         return new String(out);
-    }
-
-    public static void post(String url, String payload, OnAdListener onAdListener) {
-
     }
 
     /**

@@ -7,6 +7,7 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -191,7 +192,7 @@ public final class RtbManager {
             @Override
             public void onFinish(Message message, String response) {
                 if (Message.SUCCESS.equals(message)) {
-                    Result<List<RtbAD>> result = null;
+                    Result<List<RtbAD>> result;
                     try {
                         result = gson.fromJson(response, new TypeToken<Result<List<RtbAD>>>() {
                         }.getType());
@@ -266,7 +267,7 @@ public final class RtbManager {
         if (response == null) {
             return null;
         }
-        Result<List<RtbAD>> result = null;
+        Result<List<RtbAD>> result;
         try {
             result = gson.fromJson(response, new TypeToken<Result<List<RtbAD>>>() {
             }.getType());
@@ -298,7 +299,7 @@ public final class RtbManager {
             onAdListener.onAd(Message.FAILED_UNLINK_SLOT, null);
             return;
         }
-        YLog.d("批量请求广告" + rtbSlots);
+        YLog.d("批量请求广告" + Arrays.toString(rtbSlots));
         final CountDownLatch countDownLatch = new CountDownLatch(rtbSlots.length);
         final List<RtbAD> allAdList = Collections.synchronizedList(new LinkedList<RtbAD>());
         Tools.pool.execute(new Runnable() {
@@ -337,7 +338,7 @@ public final class RtbManager {
         if (rtbSlots == null || rtbSlots.length == 0) {
             return null;
         }
-        YLog.d("批量请求广告" + rtbSlots);
+        YLog.d("批量请求广告" + Arrays.toString(rtbSlots));
         final List<RtbAD> allAdList = Collections.synchronizedList(new LinkedList<RtbAD>());
         for (final RtbSlot rtbSlot : rtbSlots) {
             List<RtbAD> request = requestSync(rtbSlot);

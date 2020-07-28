@@ -8,6 +8,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -214,7 +215,7 @@ public final class RtbManager2 {
                 currentTimeMillis, unicode, VERSION, sign);
         HashMap<String, String> params = new HashMap<>();
         params.put("payload", payload);
-        String response = null;
+        String response;
         try {
             response = request.post2(url, params);
             YLog.d("response : " + response);
@@ -223,7 +224,7 @@ public final class RtbManager2 {
             return new Response(new Message(Message.FAILED_REQUEST_EXCEPTION.code,
                     e.getMessage()), null);
         }
-        Result<List<RtbAD>> result = null;
+        Result<List<RtbAD>> result;
         try {
             result = gson.fromJson(response, new TypeToken<Result<List<RtbAD>>>() {
             }.getType());
@@ -250,7 +251,7 @@ public final class RtbManager2 {
         if (rtbSlots == null || rtbSlots.length == 0) {
             return null;
         }
-        YLog.d("批量请求广告" + rtbSlots);
+        YLog.d("批量请求广告" + Arrays.toString(rtbSlots));
         List<Response> list = new ArrayList<>();
         for (final RtbSlot rtbSlot : rtbSlots) {
             Response response = requestSync(rtbSlot, device);
