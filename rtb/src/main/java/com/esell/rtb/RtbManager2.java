@@ -217,6 +217,7 @@ public final class RtbManager2 {
         String response = null;
         try {
             response = request.post2(url, params);
+            YLog.d("response : " + response);
         } catch (Exception e) {
             e.printStackTrace();
             return new Response(new Message(Message.FAILED_REQUEST_EXCEPTION.code,

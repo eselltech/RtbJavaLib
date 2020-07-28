@@ -24,6 +24,21 @@ public class Device {
      */
     private double latitude;
 
+    public Device(String unicode) {
+        this.unicode = unicode;
+    }
+
+    public Device(String unicode, String ip) {
+        this.unicode = unicode;
+        this.ip = ip;
+    }
+
+    public Device(String unicode, double longitude, double latitude) {
+        this.unicode = unicode;
+        this.longitude = longitude;
+        this.latitude = latitude;
+    }
+
     public Device(String unicode, String ip, double longitude, double latitude) {
         this.unicode = unicode;
         this.ip = ip;
