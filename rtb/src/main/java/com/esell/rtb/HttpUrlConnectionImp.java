@@ -175,14 +175,13 @@ final class HttpUrlConnectionImp implements IRTBRequest {
                         new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
                 return readResponseBody(bufferedReader);
             }
+            throw new IllegalStateException("responseCode : "+responseCode + ",responseMessage : "+httpURLConnection.getResponseMessage());
         } catch (Exception e) {
-            e.printStackTrace();
             throw e;
         } finally {
             Tools.closeCloseable(outputStream);
             Tools.closeCloseable(bufferedReader);
         }
-        return null;
     }
 
 
