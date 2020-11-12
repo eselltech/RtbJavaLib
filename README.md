@@ -2,7 +2,7 @@
 屏效宝rtb广告
 
 # release
-    0.0.7
+    0.0.8
         1、去除广告位类型限制 添加两个构造方法
             {@link RtbSlot#RtbSlot(String)}
             {@link RtbSlot#RtbSlot(String, int)}
