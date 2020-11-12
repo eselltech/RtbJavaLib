@@ -14,21 +14,30 @@ public class RtbSlot {
     /**
      * 资源类型
      */
+    @Deprecated
     public String type;
     /**
      * 数量
      */
     public int quantity = 1;
-
+    @Deprecated
     public RtbSlot(String pxbSlotId, String type, int quantity) {
         this.pxbSlotId = pxbSlotId;
         this.type = type;
         this.quantity = quantity;
     }
-
+    @Deprecated
     public RtbSlot(String pxbSlotId, String type) {
         this.pxbSlotId = pxbSlotId;
         this.type = type;
+    }
+    public RtbSlot(String pxbSlotId) {
+        this.pxbSlotId = pxbSlotId;
+    }
+
+    public RtbSlot(String pxbSlotId,int quantity) {
+        this.pxbSlotId = pxbSlotId;
+        this.quantity = quantity;
     }
 
     public String getPxbSlotId() {
@@ -38,11 +47,11 @@ public class RtbSlot {
     public void setPxbSlotId(String pxbSlotId) {
         this.pxbSlotId = pxbSlotId;
     }
-
+    @Deprecated
     public String getType() {
         return type;
     }
-
+    @Deprecated
     public void setType(String type) {
         this.type = type;
     }

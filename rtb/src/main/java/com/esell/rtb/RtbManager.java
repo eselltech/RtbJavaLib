@@ -219,7 +219,7 @@ public final class RtbManager {
     private String getPayload(RtbSlot rtbSlot) {
         /*请求类*/
         RtbRequestModel rtbRequestBean = new RtbRequestModel(
-                rtbSlot.quantity, rtbSlot.pxbSlotId, rtbSlot.type, unicode);
+                rtbSlot.quantity, rtbSlot.pxbSlotId, unicode);
         rtbRequestBean.setIp(ip);
         rtbRequestBean.setLongitude(longitude);
         rtbRequestBean.setLatitude(latitude);

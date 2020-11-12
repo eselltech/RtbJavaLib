@@ -154,8 +154,7 @@ public final class RtbManager2 {
 
     private final String getPayload(RtbSlot rtbSlot, Device device) {
         /*请求类*/
-        RtbRequestModel rtbRequestBean = new RtbRequestModel(rtbSlot.quantity, rtbSlot.pxbSlotId,
-                rtbSlot.type, device.getUnicode());
+        RtbRequestModel rtbRequestBean = new RtbRequestModel(rtbSlot.quantity, rtbSlot.pxbSlotId, device.getUnicode());
         String ip = device.getIp();
         double latitude = device.getLatitude();
         double longitude = device.getLongitude();

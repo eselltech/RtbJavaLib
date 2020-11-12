@@ -32,10 +32,6 @@ final class RtbRequestModel {
     @SerializedName("slot-id")
     private String slotId;
     /**
-     * 请求类型 VDO IMG
-     */
-    private String type;
-    /**
      * 设备编号
      */
     @SerializedName("device-uuid")
@@ -65,14 +61,6 @@ final class RtbRequestModel {
         this.slotId = slotId;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
     public String getDeviceUuid() {
         return deviceUuid;
     }
@@ -81,11 +69,10 @@ final class RtbRequestModel {
         this.deviceUuid = deviceUuid;
     }
 
-    public RtbRequestModel(int quantity, String slotId, String type,
+    public RtbRequestModel(int quantity, String slotId,
                            String deviceUuid) {
         this.quantity = quantity;
         this.slotId = slotId;
-        this.type = type;
         this.deviceUuid = deviceUuid;
     }
 
