@@ -43,12 +43,12 @@ public final class RtbManager2 {
     /**
      * 签名格式
      */
-    final String signFormat = "appid=%s&appkey=%s&payload=%s&sequence=%s&timestamp=%s&uuid=%s" +
+    final String signFormat = "appid=%s&appkey=%s&payload=%s&sequence=%s&timestamp=%s" +
             "&version=%s";
     /**
      * 路径格式
      */
-    final String urlFormat = "%s?appid=%s&sequence=%s&timestamp=%s&uuid=%s&version=%s&sign=%s";
+    final String urlFormat = "%s?appid=%s&sequence=%s&timestamp=%s&version=%s&sign=%s";
 
     final String staticUrlFormat =
             "%s?sid=%s&aid=%s&mid=%s&uid=%s&ip=%s&mac=%s&lat=%s&lon=%s&tt" + "=%s";
@@ -200,18 +200,17 @@ public final class RtbManager2 {
         if (device == null) {
             return new Response(Message.FAILED_DEVICE_NULL, null);
         }
-        String unicode = device.getUnicode();
         YLog.d("请求广告" + rtbSlot);
         final long currentTimeMillis = System.currentTimeMillis();
         final String payload = getPayload(rtbSlot, device);
         /*签名格式字符串*/
         final String signFormatStr = String.format(signFormat, appId, appKey, payload,
-                currentTimeMillis, currentTimeMillis, unicode, VERSION);
+                currentTimeMillis, currentTimeMillis, VERSION);
         /*最终签名*/
         final String sign = Tools.md5Hex(signFormatStr);
         /*请求路径*/
         final String url = String.format(urlFormat, URL_AD, appId, currentTimeMillis,
-                currentTimeMillis, unicode, VERSION, sign);
+                currentTimeMillis, VERSION, sign);
         HashMap<String, String> params = new HashMap<>(1);
         params.put("payload", payload);
         String response;
