@@ -3,6 +3,11 @@
 
 # release
     0.0.7
+        1、去除广告位类型限制 添加两个构造方法
+            {@link RtbSlot#RtbSlot(String)}
+            {@link RtbSlot#RtbSlot(String, int)}
+        2、修复unicode带中文不能请求问题
+    0.0.7
         1、静态代码检测优化
     0.0.6
         1、废弃RtbManager 改用RtbManager2 支持多设备

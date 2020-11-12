@@ -15,6 +15,12 @@ import java.util.List;
  * @date 2019/11/8 16:15
  */
 public class Test {
+
+    /**
+     * {@link RtbSlot#RtbSlot(String)}
+     * {@link RtbSlot#RtbSlot(String, int)}
+     * @param args
+     */
     public static void main(String[] args) {
         RtbManager2 rtbManager2 = RtbManager2.getInstance();
         rtbManager2.init("pxbAppId", "pxbAppKey");
@@ -24,7 +30,7 @@ public class Test {
                 YLog.d(message + "," + adList);
             }
         },
-        new RtbSlot("广告位id", "类型", 1/*数量*/),
+        new RtbSlot("广告位id",1/*数量*/),
         new Device("unicode"));
 //        new Device("unicode","ip"));
 //        new Device("unicode",113.957647,22.544867));
