@@ -19,7 +19,7 @@ public class RtbSlot {
     /**
      * 数量
      */
-    public int quantity = 1;
+    public int quantity;
     @Deprecated
     public RtbSlot(String pxbSlotId, String type, int quantity) {
         this.pxbSlotId = pxbSlotId;

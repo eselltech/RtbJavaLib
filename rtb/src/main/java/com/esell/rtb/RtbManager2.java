@@ -158,6 +158,8 @@ public final class RtbManager2 {
         String ip = device.getIp();
         double latitude = device.getLatitude();
         double longitude = device.getLongitude();
+        int quantity = rtbSlot.getQuantity();
+        String type = rtbSlot.getType();
         rtbRequestBean.setIp(ip);
         rtbRequestBean.setLongitude(longitude);
         rtbRequestBean.setLatitude(latitude);
@@ -170,6 +172,9 @@ public final class RtbManager2 {
             if (longitude == -1 || latitude == -1) {
                 jsonObject.remove("longitude");
                 jsonObject.remove("latitude");
+            }
+            if (quantity <= 0) {
+                jsonObject.remove("quantity");
             }
             /*对象转json格式*/
             return jsonObject.toString();
