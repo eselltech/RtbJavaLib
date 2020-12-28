@@ -2,6 +2,8 @@
 屏效宝rtb广告
 
 # release
+    0.1.0
+        1、quantity 默认0
     0.0.9
         1、去除quantity 默认值
     0.0.8
