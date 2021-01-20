@@ -8,7 +8,7 @@ import java.util.HashMap;
  * @author NiuLei
  * @date 2019/11/8 15:20
  */
-public interface IRTBRequest {
+public interface IRTBRequest extends IExtend{
     /**
      * 默认超时时间
      */

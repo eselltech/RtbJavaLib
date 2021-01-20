@@ -21,7 +21,7 @@ import static com.esell.rtb.Message.FAILED_RESPONSE_JSON_SYNTAX;
  * @author NiuLei
  * @date 2019/11/8 14:06
  */
-public final class RtbManager2 {
+public final class RtbManager2 implements IExtend{
     private static final RtbManager2 RTB_MANAGER = new RtbManager2();
     /**
      * 基本路径
@@ -359,5 +359,15 @@ public final class RtbManager2 {
     public String dynamicReportSync(String trackUrl) {
         checkInit();
         return request.post(trackUrl, null);
+    }
+
+    @Override
+    public void setConnectTimeout(int connectTimeout) {
+        request.setConnectTimeout(connectTimeout);
+    }
+
+    @Override
+    public void setReadTimeout(int readTimeout) {
+        request.setReadTimeout(readTimeout);
     }
 }

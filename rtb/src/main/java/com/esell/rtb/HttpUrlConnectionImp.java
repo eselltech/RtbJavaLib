@@ -17,6 +17,9 @@ import java.util.HashMap;
  */
 final class HttpUrlConnectionImp implements IRTBRequest {
 
+    private int connectTimeout = IRTBRequest.TIMEOUT;
+    private int readTimeout= IRTBRequest.TIMEOUT;
+
     @Override
     public void postOnWorkThread(final String url, final HashMap<String, String> params,
                                  final Callback callback) {
@@ -61,8 +64,8 @@ final class HttpUrlConnectionImp implements IRTBRequest {
      */
     private void configConnection(HttpURLConnection httpURLConnection) throws ProtocolException {
         httpURLConnection.setRequestMethod("POST");
-        httpURLConnection.setConnectTimeout(TIMEOUT);
-        httpURLConnection.setReadTimeout(TIMEOUT);
+        httpURLConnection.setConnectTimeout(connectTimeout);
+        httpURLConnection.setReadTimeout(readTimeout);
         httpURLConnection.setRequestProperty("Connection", "close");
         httpURLConnection.setDoInput(true);
         httpURLConnection.setDoOutput(true);
@@ -109,37 +112,11 @@ final class HttpUrlConnectionImp implements IRTBRequest {
      */
     final void post(final String url, final HashMap<String, String> params,
                     final Callback callback) {
-        if (callback == null) {
-            return;
-        }
-        if (Tools.isEmpty(url)) {
-            callback.onFinish(Message.FAILED_URL_EMPTY, null);
-            return;
-        }
-        HttpURLConnection httpURLConnection;
-        OutputStream outputStream = null;
-        BufferedReader bufferedReader = null;
         try {
-            httpURLConnection = (HttpURLConnection) new URL(url).openConnection();
-            configConnection(httpURLConnection);
-            httpURLConnection.connect();
-            outputStream = writeParams(httpURLConnection, params);
-            int responseCode = httpURLConnection.getResponseCode();
-            if (HttpURLConnection.HTTP_OK == responseCode) {
-                bufferedReader =
-                        new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
-                String readResponseBody = readResponseBody(bufferedReader);
-                YLog.d("readResponseBody : " + readResponseBody);
-                callback.onFinish(Message.SUCCESS, readResponseBody);
-            } else {
-                callback.onFinish(new Message(responseCode,
-                        httpURLConnection.getResponseMessage()), null);
-            }
+            String s = post2(url, params);
+            callback.onFinish(Message.SUCCESS, s);
         } catch (Exception e) {
             callback.onFinish(new Message("Exception".hashCode(), Tools.throwable2String(e)), null);
-        } finally {
-            Tools.closeCloseable(outputStream);
-            Tools.closeCloseable(bufferedReader);
         }
     }
 
@@ -185,4 +162,13 @@ final class HttpUrlConnectionImp implements IRTBRequest {
     }
 
 
+    @Override
+    public void setConnectTimeout(int connectTimeout) {
+        this.connectTimeout = connectTimeout;
+    }
+
+    @Override
+    public void setReadTimeout(int readTimeout) {
+        this.readTimeout = readTimeout;
+    }
 }
