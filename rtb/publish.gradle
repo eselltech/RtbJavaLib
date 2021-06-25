@@ -23,6 +23,9 @@ ext["ossrhPassword"] = 'Sonatype123..'
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
 }
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
 
 signing {
     sign publishing.publications
@@ -35,6 +38,9 @@ publishing {
             artifactId PUBLISH_ARTIFACT_ID
             version PUBLISH_VERSION
             artifact("$buildDir/libs/${projectName}.jar")
+            artifact sourceJar {
+                classifier "sources"
+            }
             pom {
                 name = PUBLISH_ARTIFACT_ID
                 description = PUBLISH_ARTIFACT_ID
@@ -61,6 +67,22 @@ publishing {
                     //分支地址：
                     url = 'https://github.com/eselltech/YXFSDKSimple/tree/master'
                 }
+                withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+                    Set set = new HashSet()
+                    set.addAll(project.configurations.api.allDependencies)
+                    set.addAll(project.configurations.implementation.allDependencies)
+                    set.each {
+                        if (it.name != "unspecified") {
+                            def dependencyNode = dependenciesNode.appendNode('dependency')
+                            dependencyNode.appendNode('groupId', it.group)
+                            dependencyNode.appendNode('artifactId', it.name)
+                            dependencyNode.appendNode('version', it.version)
+                            dependencyNode.appendNode('scope', 'compile')
+
+                        }
+                    }
+                }
             }
         }
     }
@@ -83,7 +105,7 @@ publishing {
     }
 }
 
-task uploadArchives(dependsOn: ['assemble', 'publish']) {
+task uploadArchives(dependsOn: ['jar', 'publish']) {
     doLast {
         println "finish uploadArchives."
     }
