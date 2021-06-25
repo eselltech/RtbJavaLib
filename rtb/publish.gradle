@@ -1,0 +1,93 @@
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+/*模块名称*/
+def projectName = getProject().name
+/*模块版本名称*/
+def modelVersionName = "${projectName}_versionName"
+/*groupId*/
+def PUBLISH_GROUP_ID = rootProject.ext.groupId
+/*模块名称*/
+def PUBLISH_ARTIFACT_ID = projectName
+/*模块版本*/
+def PUBLISH_VERSION = rootProject.ext.get(modelVersionName)
+
+/*签名*/
+ext["signing.keyId"] = '842E6880'
+ext["signing.password"] = 'Sonatype123..'
+ext["signing.secretKeyRingFile"] = new File(rootDir, "secring.gpg").absolutePath
+/*maven账号*/
+ext["ossrhUsername"] = 'eselltech'
+ext["ossrhPassword"] = 'Sonatype123..'
+
+// 指定编码
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+signing {
+    sign publishing.publications
+}
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId PUBLISH_GROUP_ID
+            artifactId PUBLISH_ARTIFACT_ID
+            version PUBLISH_VERSION
+            artifact("$buildDir/libs/${projectName}.jar")
+            pom {
+                name = PUBLISH_ARTIFACT_ID
+                description = PUBLISH_ARTIFACT_ID
+                // If your project has a dedicated site, use its URL here
+                url = 'https://github.com/eselltech/YXFSDKSimple'
+                licenses {
+                    license {
+                        //协议类型，一般默认Apache License2.0的话不用改：
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'eselltech'
+                        name = 'esell'
+                        email = 'niulei@eselltech.com'
+                    }
+                }
+                // Version control info, if you're using GitHub, follow the format as seen here
+                scm {
+                    connection = 'scm:git:github.com/eselltech/YXFSDKSimple.git'
+                    developerConnection = 'scm:git:ssh://github.com/eselltech/YXFSDKSimple.git'
+                    //分支地址：
+                    url = 'https://github.com/eselltech/YXFSDKSimple/tree/master'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            if (PUBLISH_VERSION.toLowerCase().endsWith("-local")) {
+                url = "file://" + getProject().rootDir.absolutePath + File.separator + "repository"
+            } else {
+                if (PUBLISH_VERSION.toLowerCase().endsWith("-snapshot")) {
+                    url = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+                } else {
+                    url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                }
+                credentials {
+                    username ossrhUsername
+                    password ossrhPassword
+                }
+            }
+        }
+    }
+}
+
+task uploadArchives(dependsOn: ['assemble', 'publish']) {
+    doLast {
+        println "finish uploadArchives."
+    }
+}
+
+uploadArchives.setGroup('yxfSdk')
+

@@ -1,34 +1,8 @@
 apply plugin: 'java-library'
-
-apply plugin: 'maven'
-apply plugin: 'com.novoda.bintray-release'
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            String path = "file://" + getProject().rootDir.absolutePath + File.separator + "repository"
-            repository(url: path)
-            pom.version = '0.1.1'
-            pom.groupId = 'com.esell'
-            pom.artifactId = 'rtb'
-        }
-    }
-}
-publish {
-    repoName = 'javaSdk'
-    userOrg = 'eselltech'//bintray.com用户名
-    groupId = 'com.esell'//jcenter上的路径
-    artifactId = 'rtb'//项目名称
-    publishVersion = '0.1.1'//版本号
-    desc = '屏效包广告请求'//描述，不重要
-}
-
+apply from: "publish.gradle"
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     api ('com.google.code.gson:gson:2.8.6'){transitive=true}
-}
-tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8"
 }
 
 sourceCompatibility = "7"

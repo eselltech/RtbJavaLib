@@ -19,6 +19,7 @@ allprojects {
     repositories {
         google()
         jcenter()
+        maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
     }
     // 解决 Execution failed for task':[YourLibraryName]:mavenAndroidJavadocs'.
     tasks.withType(Javadoc) {
@@ -31,7 +32,14 @@ allprojects {
         }
     }
 }
+ext {
+    groupId = "io.github.eselltech"
 
+    /*-LOCAL 本地版*/
+    /*-SNAPSHOT 开发版 */
+
+    rtb_versionName = "0.1.1-SNAPSHOT"
+}
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
